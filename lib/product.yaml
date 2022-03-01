@@ -1,0 +1,295 @@
+openapi: 3.0.0
+info:
+  title: product-svc
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+paths:
+  /api/products/v1/product:
+    post:
+      tags:
+        - General
+      summary: Product creation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_name:
+                  type: integer
+                category_id:
+                  type: string
+              required:
+                - product_name
+                - category_id
+              example:   # Sample object
+                product_name: Product name
+                product_price: 20
+                category_id: 1
+                status: listed
+                images:
+                    - main_image: 'https://www.example.com/main.jpg'
+                      small_image: 'https://www.example.com/small.jpg'
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Product successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/CreationSuccess'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorFetch'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/InternalServerError'
+  /api/products/v1/product/list:
+    get:
+      tags:
+        - General
+      summary: List products
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: sortBy
+          in: query
+          schema:
+            type: integer
+          example: 'name'
+        - name: sort
+          in: query
+          schema:
+            type: integer
+          example: 'asc'
+      responses:
+        '200':
+          description: products returned
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/ProductListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorFetch'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/InternalServerError'
+  /api/products/v1/category/list:
+    get:
+      tags:
+        - General
+      summary: List categories
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '1'
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: sortBy
+          in: query
+          schema:
+            type: integer
+          example: 'name'
+        - name: sort
+          in: query
+          schema:
+            type: integer
+          example: 'asc'
+      responses:
+        '200':
+          description: Categories to be returned
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/definitions/CategoryListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorFetch'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/InternalServerError'
+  /api/products/v1/product/{product_id}:
+    get:
+      tags:
+        - General
+      summary: Product details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '7a968ffc3e'
+      responses:
+        '200':
+          description: product details
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/definitions/ProductResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/ErrorFetch'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/InternalServerError'
+definitions:
+  ProductListResponse:
+    type: object
+    properties:
+      product_id:
+        type: string
+      product_name:
+        type: string
+      product_price:
+        type: string
+      status:
+        type: string
+      category_id:
+        type: string
+      main_image:
+        type: string
+      small_image:
+        type: string
+  ProductResponse:
+    type: object
+    properties:
+      product_id:
+        type: string
+      product_name:
+        type: string
+      product_price:
+        type: string
+      category_id:
+        type: string
+      main_image:
+        type: string
+      small_image:
+        type: string
+  CategoryListResponse:
+    type: object
+    properties:
+      parent_id:
+        type: string
+      category_id:
+        type: string
+      category_name:
+        type: string
+  SuccessLogin:
+    type: object
+    properties:
+      issuer_name:
+        type: string
+      image:
+        type: string
+      status:
+        type: string
+      issuer_config:
+        type: array
+        items:
+          $ref: '#/definitions/Configs'
+      roles:
+        type: array
+        items:
+          $ref: '#/definitions/Roles'
+      dashboard_stats:
+        type: array
+        items:
+          $ref: '#/definitions/Stats'
+  Configs:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+  CreationSuccess:
+    type: object
+    properties:
+      product_id:
+        type: string
+      checksum:
+        type: string
+  NotFoundError:
+    type: object
+    properties:
+      message:
+        type: string
+      status:
+        type: number
+  InternalServerError:
+    type: object
+    properties:
+      message:
+        type: string
+      status:
+        type: number
+  BadRequestError:
+    type: object
+    properties:
+      message:
+        type: string
+      status:
+        type: number
+  ErrorFetch:
+    type: object
+    properties:
+      message:
+        type: string
+      status:
+        type: number
